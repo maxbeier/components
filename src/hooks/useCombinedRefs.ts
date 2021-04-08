@@ -22,6 +22,7 @@ export function useCombinedRefs<T>(...refs: (ForwardedRef<T> | null | undefined)
         ref.current = combinedRef.current ?? null
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...refs, combinedRef])
 
   return combinedRef

@@ -2,8 +2,7 @@ import {useOnOutsideClick, TouchOrMouseEvent} from './useOnOutsideClick'
 import {useOpenAndCloseFocus} from './useOpenAndCloseFocus'
 import {useOnEscapePress} from './useOnEscapePress'
 import {AnchoredPositionHookSettings, useAnchoredPosition} from './useAnchoredPosition'
-import {useRef} from 'react'
-import { useProvidedRefOrCreate } from './useProvidedRefOrCreate'
+import {useProvidedRefOrCreate} from './useProvidedRefOrCreate'
 
 export type UseOverlaySettings = {
   ignoreClickRefs?: React.RefObject<HTMLElement>[]

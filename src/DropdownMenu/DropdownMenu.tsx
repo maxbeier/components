@@ -18,13 +18,13 @@ export function DropdownMenu({
   const anchorRef = useRef<HTMLElement>(null)
   const anchorId = `dropdownMenuAnchor-${window.crypto.getRandomValues(new Uint8Array(4)).join('')}`
   const [selection, select] = useState<string>('')
-  const [openState, setOpenState] = useState<"closed" | "open" | "ready">("closed")
-  const onDismiss = useCallback(() => setOpenState("closed"), [setOpenState])
+  const [openState, setOpenState] = useState<'closed' | 'open' | 'ready'>('closed')
+  const onDismiss = useCallback(() => setOpenState('closed'), [setOpenState])
 
   const overlayRef = React.useRef<HTMLDivElement>(null)
 
-  useFocusZone({containerRef: overlayRef, disabled: openState !== "ready"})
-  useFocusTrap({containerRef: overlayRef, disabled: openState !== "ready"})
+  useFocusZone({containerRef: overlayRef, disabled: openState !== 'ready'})
+  useFocusTrap({containerRef: overlayRef, disabled: openState !== 'ready'})
 
   return (
     <>
@@ -34,9 +34,9 @@ export function DropdownMenu({
         'aria-labelledby': anchorId,
         'aria-haspopup': 'listbox',
         children: selection,
-        onClick: () => setOpenState(openState === "closed" ? "open" : "closed")
+        onClick: () => setOpenState(openState === 'closed' ? 'open' : 'closed')
       })}
-      {openState !== "closed" && (
+      {openState !== 'closed' && (
         <Overlay
           anchorRef={anchorRef}
           returnFocusRef={anchorRef}
@@ -44,7 +44,7 @@ export function DropdownMenu({
           onEscape={onDismiss}
           ref={overlayRef}
           onPositionChanged={() => {
-            setOpenState("ready")
+            setOpenState('ready')
           }}
         >
           <List
@@ -57,7 +57,7 @@ export function DropdownMenu({
                 selected: itemProps.text === selection,
                 onClick: event => {
                   select(itemProps.text === selection ? '' : itemProps.text ?? '')
-                  setOpenState("closed")
+                  setOpenState('closed')
                   onClick && onClick(event)
                 }
               })

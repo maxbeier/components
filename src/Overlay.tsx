@@ -5,7 +5,7 @@ import {ComponentProps} from './utils/types'
 import {useOverlay, AnchoredPositionHookSettings, TouchOrMouseEvent} from './hooks'
 import Portal from './Portal'
 import sx, {SxProp} from './sx'
-import { useCombinedRefs } from './hooks/useCombinedRefs'
+import {useCombinedRefs} from './hooks/useCombinedRefs'
 
 type StyledOverlayProps = {
   width?: keyof typeof widthMap
@@ -78,57 +78,61 @@ export type OverlayProps = {
  * @param returnFocusRef Required. Ref for the element to focus when the `Overlay` is closed.
  * @param onClickOutside  Required. Function to call when clicking outside of the `Overlay`. Typically this function sets the `Overlay` visibility state to `false`.
  * @param onEscape Required. Function to call when user presses `Escape`. Typically this function sets the `Overlay` visibility state to `false`.
- * @param onPositionUpdated Optional. 
+ * @param onPositionUpdated Optional.
  * @param width Sets the width of the `Overlay`, pick from our set list of widths, or pass `auto` to automatically set the width based on the content of the `Overlay`. `sm` corresponds to `256px`, `md` corresponds to `320px`, `lg` corresponds to `480px`, and `xl` corresponds to `640px`.
  * @param height Sets the height of the `Overlay`, pick from our set list of heights, or pass `auto` to automatically set the height based on the content of the `Overlay`. `sm` corresponds to `480px` and `md` corresponds to `640px`.
  */
-const Overlay = React.forwardRef(({
-  onClickOutside,
-  role = 'dialog',
-  positionSettings,
-  positionDeps,
-  anchorRef,
-  initialFocusRef,
-  returnFocusRef,
-  ignoreClickRefs,
-  onPositionChanged,
-  onEscape,
-  ...rest
-}: OverlayProps, forwardedRef: React.ForwardedRef<HTMLDivElement>): ReactElement => {
+const Overlay = React.forwardRef(
+  (
+    {
+      onClickOutside,
+      role = 'dialog',
+      positionSettings,
+      positionDeps,
+      anchorRef,
+      initialFocusRef,
+      returnFocusRef,
+      ignoreClickRefs,
+      onPositionChanged,
+      onEscape,
+      ...rest
+    }: OverlayProps,
+    forwardedRef: React.ForwardedRef<HTMLDivElement>
+  ): ReactElement => {
+    const overlayRef = React.useRef<HTMLDivElement>(null)
+    const combinedRef = useCombinedRefs(forwardedRef, overlayRef)
+    const {position} = useOverlay({
+      anchorRef,
+      positionSettings,
+      positionDeps: [forwardedRef, ...(positionDeps ?? [])],
+      returnFocusRef,
+      onEscape,
+      ignoreClickRefs,
+      onClickOutside,
+      initialFocusRef,
+      overlayRef
+    })
 
-  const overlayRef = React.useRef<HTMLDivElement>(null)
-  const combinedRef = useCombinedRefs(forwardedRef, overlayRef)
-  const {position} = useOverlay({
-    anchorRef,
-    positionSettings,
-    positionDeps: [forwardedRef],
-    returnFocusRef,
-    onEscape,
-    ignoreClickRefs,
-    onClickOutside,
-    initialFocusRef,
-    overlayRef
-  })
-  
-  useEffect(() => {
-    if (position && typeof onPositionChanged === "function") {
-      onPositionChanged()
-    }
-  }, [position])
+    useEffect(() => {
+      if (position && typeof onPositionChanged === 'function') {
+        onPositionChanged()
+      }
+    }, [onPositionChanged, position])
 
-  return (
-    <Portal>
-      <StyledOverlay
-        ref={combinedRef}
-        {...position}
-        visibility={position ? 'visible' : 'hidden'}
-        aria-modal="true"
-        role={role}
-        {...rest}
-      />
-    </Portal>
-  )
-})
+    return (
+      <Portal>
+        <StyledOverlay
+          ref={combinedRef}
+          {...position}
+          visibility={position ? 'visible' : 'hidden'}
+          aria-modal="true"
+          role={role}
+          {...rest}
+        />
+      </Portal>
+    )
+  }
+)
 
 // Overlay.defaultProps = {
 //   height: 'auto',
