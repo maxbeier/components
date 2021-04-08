@@ -3,6 +3,8 @@ import {List, GroupedListProps, ListPropsBase} from '../ActionList/List'
 import Overlay from '../Overlay'
 import {DropdownButton, DropdownButtonProps} from './DropdownButton'
 import {Item} from '../ActionList/Item'
+import {useFocusTrap} from '../hooks/useFocusTrap'
+import {useFocusZone} from '../hooks/useFocusZone'
 
 export interface DropdownMenuProps extends Partial<Omit<GroupedListProps, keyof ListPropsBase>>, ListPropsBase {
   renderAnchor?: <T extends React.HTMLAttributes<HTMLElement>>(props: T) => JSX.Element
@@ -16,8 +18,14 @@ export function DropdownMenu({
   const anchorRef = useRef<HTMLElement>(null)
   const anchorId = `dropdownMenuAnchor-${window.crypto.getRandomValues(new Uint8Array(4)).join('')}`
   const [selection, select] = useState<string>('')
-  const [open, setOpen] = useState<boolean>(false)
-  const onDismiss = useCallback(() => setOpen(false), [setOpen])
+  const [openState, setOpenState] = useState<"closed" | "open" | "ready">("closed")
+  const onDismiss = useCallback(() => setOpenState("closed"), [setOpenState])
+
+  const overlayRef = React.useRef<HTMLDivElement>(null)
+
+  useFocusZone({containerRef: overlayRef, disabled: openState !== "ready"})
+  useFocusTrap({containerRef: overlayRef, disabled: openState !== "ready"})
+
   return (
     <>
       {renderAnchor({
@@ -26,10 +34,19 @@ export function DropdownMenu({
         'aria-labelledby': anchorId,
         'aria-haspopup': 'listbox',
         children: selection,
-        onClick: () => setOpen(!open)
+        onClick: () => setOpenState(openState === "closed" ? "open" : "closed")
       })}
-      {open && (
-        <Overlay anchorRef={anchorRef} returnFocusRef={anchorRef} onClickOutside={onDismiss} onEscape={onDismiss}>
+      {openState !== "closed" && (
+        <Overlay
+          anchorRef={anchorRef}
+          returnFocusRef={anchorRef}
+          onClickOutside={onDismiss}
+          onEscape={onDismiss}
+          ref={overlayRef}
+          onPositionChanged={() => {
+            setOpenState("ready")
+          }}
+        >
           <List
             {...listProps}
             role="listbox"
@@ -40,7 +57,7 @@ export function DropdownMenu({
                 selected: itemProps.text === selection,
                 onClick: event => {
                   select(itemProps.text === selection ? '' : itemProps.text ?? '')
-                  setOpen(false)
+                  setOpenState("closed")
                   onClick && onClick(event)
                 }
               })

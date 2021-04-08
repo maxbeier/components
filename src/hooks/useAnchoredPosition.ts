@@ -28,11 +28,11 @@ export function useAnchoredPosition(
   const anchorElementRef = useProvidedRefOrCreate(settings?.anchorElementRef)
   const [position, setPosition] = React.useState<{top: number; left: number} | undefined>(undefined)
   React.useEffect(() => {
+    console.log('anchored position effect')
     if (floatingElementRef.current instanceof Element && anchorElementRef.current instanceof Element) {
       setPosition(getAnchoredPosition(floatingElementRef.current, anchorElementRef.current, settings))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, dependencies ?? [])
+  }, [floatingElementRef, anchorElementRef, ...(dependencies ?? [])])
   return {
     floatingElementRef,
     anchorElementRef,

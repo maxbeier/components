@@ -55,7 +55,7 @@ export function useFocusZone(
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, dependencies ?? [])
+  }, [disabled, ...(dependencies ?? [])])
 
   return {containerRef, activeDescendantControlRef}
 }

@@ -1,10 +1,11 @@
 import styled from 'styled-components'
-import React, {ReactElement} from 'react'
+import React, {ReactElement, useEffect} from 'react'
 import {get, COMMON, POSITION, SystemPositionProps, SystemCommonProps} from './constants'
 import {ComponentProps} from './utils/types'
 import {useOverlay, AnchoredPositionHookSettings, TouchOrMouseEvent} from './hooks'
 import Portal from './Portal'
 import sx, {SxProp} from './sx'
+import { useCombinedRefs } from './hooks/useCombinedRefs'
 
 type StyledOverlayProps = {
   width?: keyof typeof widthMap
@@ -60,6 +61,7 @@ export type OverlayProps = {
   anchorRef: React.RefObject<HTMLElement>
   onClickOutside: (e: TouchOrMouseEvent) => void
   onEscape: (e: KeyboardEvent) => void
+  onPositionChanged?: () => void
   positionSettings?: AnchoredPositionHookSettings
   positionDeps?: React.DependencyList
 } & Omit<ComponentProps<typeof StyledOverlay>, 'visibility' | keyof SystemPositionProps>
@@ -76,10 +78,11 @@ export type OverlayProps = {
  * @param returnFocusRef Required. Ref for the element to focus when the `Overlay` is closed.
  * @param onClickOutside  Required. Function to call when clicking outside of the `Overlay`. Typically this function sets the `Overlay` visibility state to `false`.
  * @param onEscape Required. Function to call when user presses `Escape`. Typically this function sets the `Overlay` visibility state to `false`.
+ * @param onPositionUpdated Optional. 
  * @param width Sets the width of the `Overlay`, pick from our set list of widths, or pass `auto` to automatically set the width based on the content of the `Overlay`. `sm` corresponds to `256px`, `md` corresponds to `320px`, `lg` corresponds to `480px`, and `xl` corresponds to `640px`.
  * @param height Sets the height of the `Overlay`, pick from our set list of heights, or pass `auto` to automatically set the height based on the content of the `Overlay`. `sm` corresponds to `480px` and `md` corresponds to `640px`.
  */
-const Overlay = ({
+const Overlay = React.forwardRef(({
   onClickOutside,
   role = 'dialog',
   positionSettings,
@@ -88,23 +91,35 @@ const Overlay = ({
   initialFocusRef,
   returnFocusRef,
   ignoreClickRefs,
+  onPositionChanged,
   onEscape,
   ...rest
-}: OverlayProps): ReactElement => {
-  const {position, ...overlayRest} = useOverlay({
+}: OverlayProps, forwardedRef: React.ForwardedRef<HTMLDivElement>): ReactElement => {
+
+  const overlayRef = React.useRef<HTMLDivElement>(null)
+  const combinedRef = useCombinedRefs(forwardedRef, overlayRef)
+  const {position} = useOverlay({
     anchorRef,
     positionSettings,
-    positionDeps,
+    positionDeps: [forwardedRef],
     returnFocusRef,
     onEscape,
     ignoreClickRefs,
     onClickOutside,
-    initialFocusRef
+    initialFocusRef,
+    overlayRef
   })
+  
+  useEffect(() => {
+    if (position && typeof onPositionChanged === "function") {
+      onPositionChanged()
+    }
+  }, [position])
+
   return (
     <Portal>
       <StyledOverlay
-        {...overlayRest}
+        ref={combinedRef}
         {...position}
         visibility={position ? 'visible' : 'hidden'}
         aria-modal="true"
@@ -113,11 +128,11 @@ const Overlay = ({
       />
     </Portal>
   )
-}
+})
 
-Overlay.defaultProps = {
-  height: 'auto',
-  width: 'auto'
-}
+// Overlay.defaultProps = {
+//   height: 'auto',
+//   width: 'auto'
+// }
 
 export default Overlay

@@ -3,6 +3,7 @@ import {useOpenAndCloseFocus} from './useOpenAndCloseFocus'
 import {useOnEscapePress} from './useOnEscapePress'
 import {AnchoredPositionHookSettings, useAnchoredPosition} from './useAnchoredPosition'
 import {useRef} from 'react'
+import { useProvidedRefOrCreate } from './useProvidedRefOrCreate'
 
 export type UseOverlaySettings = {
   ignoreClickRefs?: React.RefObject<HTMLElement>[]
@@ -13,6 +14,7 @@ export type UseOverlaySettings = {
   anchorRef: React.RefObject<HTMLElement>
   positionDeps?: React.DependencyList
   positionSettings?: AnchoredPositionHookSettings
+  overlayRef?: React.RefObject<HTMLDivElement>
 }
 
 export type OverlayReturnProps = {
@@ -28,9 +30,10 @@ export const useOverlay = ({
   initialFocusRef,
   onEscape,
   ignoreClickRefs,
+  overlayRef: _overlayRef,
   onClickOutside
 }: UseOverlaySettings): OverlayReturnProps => {
-  const overlayRef = useRef<HTMLDivElement>(null)
+  const overlayRef = useProvidedRefOrCreate<HTMLDivElement>(_overlayRef)
   positionSettings.anchorElementRef = anchorRef
   positionSettings.floatingElementRef = overlayRef
   useOpenAndCloseFocus({containerRef: overlayRef, returnFocusRef, initialFocusRef})
