@@ -53,10 +53,14 @@ const StyledItem = styled.div<{variant: ItemProps['variant']} & SxProp>`
 
   @media (hover: hover) and (pointer: fine) {
     :hover {
-      background: ${props =>
-        props.variant === 'danger' ? get('colors.bg.danger') : get('colors.selectMenu.tapHighlight')};
+      background: ${props => (props.variant === 'danger' ? '#FFF0F2' : '#F0F3F5')};
       cursor: pointer;
     }
+  }
+
+  &:focus {
+    background: ${props => (props.variant === 'danger' ? '#FFDBE0' : '#E0E4E7')};
+    outline: none;
   }
 
   ${sx}
@@ -103,7 +107,7 @@ export function Item({
   ...props
 }: Partial<ItemProps>): JSX.Element {
   return (
-    <StyledItem variant={variant} {...props}>
+    <StyledItem tabIndex={-1} variant={variant} {...props}>
       {LeadingVisual && (
         <LeadingVisualContainer>
           <LeadingVisual />
